@@ -4,7 +4,7 @@ An intelligent and adaptive security monitoring system for Pterodactyl Panel tha
 
 [![PyPI version](https://img.shields.io/pypi/v/pterodactyl-guardian.svg)](https://pypi.org/project/pterodactyl-guardian/)
 [![Python versions](https://img.shields.io/pypi/pyversions/pterodactyl-guardian.svg)](https://pypi.org/project/pterodactyl-guardian/)
-[![License](https://img.shields.io/pypi/l/pterodactyl-guardian.svg)](https://github.com/Zenturocloud/pterodactyl-guardian-sdk-python/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Zenturocloud/pterodactyl-guardian-sdk-python/blob/main/LICENSE)
 
 ## Overview
 
