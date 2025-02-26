@@ -1,11 +1,26 @@
 """
-Pterodactyl Guardian SDK for Python.
+Pterodactyl Guardian SDK - Intelligent security monitoring for Pterodactyl Panel.
 
-A comprehensive Python SDK for implementing abuse detection and 
-security monitoring for Pterodactyl Panel via the Pterodactyl API.
+This package provides a comprehensive security and abuse detection system
+for Pterodactyl Panel installations, leveraging advanced analysis techniques,
+adaptive learning, and behavioral prediction to identify and mitigate threats.
 """
 
 from .client import PterodactylGuardian
-from .version import __version__
+from .detect.engine import DetectionModules
+from .analysis.static import AnalysisLevel
+from .intelligence.learning import LearningMode
+from .monitoring.scheduler import ScheduleFrequency
 
-__all__ = ["PterodactylGuardian", "__version__"]
+__version__ = "0.1.0"
+__author__ = "info@zenturocloud.com"
+__license__ = "MIT"
+
+__all__ = [
+    "PterodactylGuardian",
+    "DetectionModules",
+    "AnalysisLevel",
+    "LearningMode",
+    "ScheduleFrequency",
+    "__version__",
+]
