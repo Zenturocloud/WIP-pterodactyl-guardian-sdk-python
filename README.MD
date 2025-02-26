@@ -1,6 +1,6 @@
-# Pterodactyl Guardian SDK for Python
+# Pterodactyl Guardian SDK
 
-A comprehensive Python SDK for implementing abuse detection and security monitoring for Pterodactyl Panel via the Pterodactyl API.
+An intelligent and adaptive security monitoring system for Pterodactyl Panel that automatically detects, analyzes, and protects against abuse.
 
 [![PyPI version](https://img.shields.io/pypi/v/pterodactyl-guardian.svg)](https://pypi.org/project/pterodactyl-guardian/)
 [![Python versions](https://img.shields.io/pypi/pyversions/pterodactyl-guardian.svg)](https://pypi.org/project/pterodactyl-guardian/)
@@ -8,17 +8,43 @@ A comprehensive Python SDK for implementing abuse detection and security monitor
 
 ## Overview
 
-Pterodactyl Guardian provides server administrators with a powerful toolkit for monitoring and protecting Pterodactyl Panel installations against abuse. The SDK uses the Pterodactyl API to check for suspicious activities, scan files, monitor resource usage, and detect potential security threats.
+Pterodactyl Guardian is an advanced security solution that leverages AI-driven analysis to protect your Pterodactyl Panel installation from security threats, abuse, and malicious activities. The system continuously learns from your environment and admin feedback to provide increasingly accurate protection tailored to your specific deployment.
+
+Unlike traditional security tools that rely on static rules, Pterodactyl Guardian employs intelligent pattern recognition, code analysis, and behavioral prediction to identify threats even as they evolve and adapt.
 
 ## Key Features
 
-- **API-Based Monitoring**: Leverages the Pterodactyl API for all monitoring and security operations
-- **Scheduled Checks**: Automatically scan for new users, suspicious activities, or file changes at regular intervals
-- **Event Detection**: Process Pterodactyl events to identify suspicious patterns
-- **File Security**: Scan server files and uploads for malicious content or obfuscated code
-- **User Monitoring**: Detect suspicious user behavior and potential account abuse
-- **Resource Monitoring**: Identify resource abuse across servers and instances
-- **Comprehensive Detection**: Specialized modules for various abuse types (bots, spam, data harvesting, etc.)
+### 🧠 Intelligent Analysis
+- **Adaptive Learning System**: Learns from admin feedback to reduce false positives
+- **Contextual Awareness**: Understands your environment and adapts accordingly
+- **Advanced Code Analysis**: Goes beyond pattern matching with structural understanding
+- **Behavioral Prediction**: Simulates what suspicious code would do if executed
+- **Signal Correlation**: Connects multiple indicators to identify sophisticated threats
+
+### 🔍 Comprehensive Detection
+- **Bot & Automation Detection**: Identifies automation tools across major platforms
+- **Network Abuse Protection**: Detects port scanning, DDoS attempts, and more
+- **Resource Abuse Prevention**: Guards against crypto miners and resource exhaustion
+- **Spam & Mass Communication Filtering**: Blocks mass messaging and spam attempts
+- **Data Harvesting Protection**: Prevents unauthorized scraping and data collection
+- **Game Server Protection**: Specific protection for game server environments
+- **Web Server Protection**: Detects SQL injection, XSS, and web vulnerabilities
+- **Infrastructure Protection**: Guards against container escapes and privilege escalation
+- **Obfuscation Analysis**: Uncovers hidden malicious code using 20+ detection methods
+
+### ⚙️ Flexible Configuration
+- **Plug and Play**: Works with minimal setup (URL + API key)
+- **Modular Design**: Enable/disable specific detection modules as needed
+- **Configurable Thresholds**: Fine-tune sensitivity per module
+- **Resource Controls**: Adjust CPU/memory usage to suit your environment
+- **Storage Options**: Local SQLite or external database for larger deployments
+
+### 📊 Comprehensive Monitoring
+- **User Activity Monitoring**: Tracks suspicious user behavior
+- **File System Monitoring**: Detects malicious file uploads and modifications
+- **Resource Usage Monitoring**: Identifies abnormal resource consumption
+- **Event-Based Analysis**: Responds to Pterodactyl Panel events in real-time
+- **Scheduled Scanning**: Regular security audits with configurable frequency
 
 ## Installation
 
@@ -26,307 +52,162 @@ Pterodactyl Guardian provides server administrators with a powerful toolkit for 
 pip install pterodactyl-guardian
 ```
 
-## Quick Start Examples
+## Quick Start
 
-### Basic Setup
+### Basic Setup (Just Works™)
 
 ```python
 from pterodactyl_guardian import PterodactylGuardian
 
-# Initialize the SDK with your Pterodactyl Panel API details
+# Initialize with minimal configuration
 guardian = PterodactylGuardian(
     panel_url="https://panel.yourdomain.com",
-    api_key="your-pterodactyl-api-key",
-    api_type="application"  # Use 'application' for admin API, 'client' for user API
+    api_key="your-pterodactyl-api-key"
 )
 
-# Test connection
-is_connected = guardian.test_connection()
-print(f"Connected to Pterodactyl Panel: {is_connected}")
+# Start monitoring with intelligent defaults
+guardian.start_monitoring()
+
+# Wait for events
+for event in guardian.events():
+    if event.is_threat:
+        print(f"Detected {event.threat_type} on server {event.server_name}")
+        event.take_action()  # Auto-remediate based on threat type
 ```
 
-### Scheduled User Monitoring
+### Advanced Configuration
 
 ```python
-from pterodactyl_guardian import PterodactylGuardian
-from pterodactyl_guardian.scheduler import ScheduledCheck
+from pterodactyl_guardian import PterodactylGuardian, DetectionModules, AnalysisLevel
 
-# Initialize the Guardian
 guardian = PterodactylGuardian(
     panel_url="https://panel.yourdomain.com",
     api_key="your-pterodactyl-api-key",
-    api_type="application"
-)
-
-# Create a scheduled check for new users (runs every hour)
-user_monitor = ScheduledCheck(
-    interval_hours=1,
-    check_type="new_users",
-    callback=lambda results: process_new_users(results),
-    detection_modules=["automation", "spam"]
-)
-
-def process_new_users(results):
-    for user in results.new_users:
-        if user.suspicion_score > 0.7:
-            print(f"Suspicious new user detected: {user.username} (Score: {user.suspicion_score})")
-            # Take action (log, notify admin, add restrictions, etc.)
-            guardian.add_user_note(user.id, "Flagged as potentially suspicious by Guardian")
-
-# Start monitoring
-user_monitor.start()
-```
-
-### Server File Scanning
-
-```python
-from pterodactyl_guardian import PterodactylGuardian
-from pterodactyl_guardian.scheduler import ScheduledCheck
-
-# Initialize the Guardian
-guardian = PterodactylGuardian(
-    panel_url="https://panel.yourdomain.com",
-    api_key="your-pterodactyl-api-key",
-    api_type="application"
-)
-
-# Get all servers
-servers = guardian.get_servers()
-
-# Scan files on all servers (scheduled daily)
-file_scanner = ScheduledCheck(
-    interval_hours=24,
-    check_type="server_files",
-    target_servers=servers,  # Can also specify server IDs: [1, 2, 3]
-    file_patterns=["*.php", "*.js", "*.py"],  # Patterns to scan
-    detection_modules=["obfuscation", "web_server", "security"],
-    callback=lambda results: handle_suspicious_files(results)
-)
-
-def handle_suspicious_files(results):
-    for server_id, files in results.suspicious_files.items():
-        if files:
-            server_name = guardian.get_server_name(server_id)
-            print(f"Suspicious files detected on server {server_name}:")
-            for file in files:
-                print(f"  - {file.path} (Threat: {file.threat_type}, Score: {file.threat_score})")
-                # Take action (backup, quarantine, notify admin, etc.)
-
-# Start file scanning
-file_scanner.start()
-```
-
-### Resource Usage Monitoring
-
-```python
-from pterodactyl_guardian import PterodactylGuardian
-from pterodactyl_guardian.scheduler import ScheduledCheck
-
-# Initialize the Guardian
-guardian = PterodactylGuardian(
-    panel_url="https://panel.yourdomain.com",
-    api_key="your-pterodactyl-api-key",
-    api_type="application"
-)
-
-# Monitor resource usage (runs every 15 minutes)
-resource_monitor = ScheduledCheck(
-    interval_minutes=15,
-    check_type="resource_usage",
-    resource_types=["cpu", "memory", "disk", "network"],
-    thresholds={
-        "cpu": 90,  # Alert if CPU usage exceeds 90%
-        "memory": 85,  # Alert if memory usage exceeds 85%
-        "disk": 95,  # Alert if disk usage exceeds 95%
-        "network": 10000000  # Alert if network traffic exceeds 10MB/s
-    },
-    callback=lambda results: handle_resource_alerts(results)
-)
-
-def handle_resource_alerts(results):
-    for server_id, alerts in results.resource_alerts.items():
-        if alerts:
-            server_name = guardian.get_server_name(server_id)
-            print(f"Resource alerts for server {server_name}:")
-            for alert in alerts:
-                print(f"  - {alert.resource_type}: {alert.current_value}% (Threshold: {alert.threshold}%)")
-                
-                # Investigate suspicious processes
-                if alert.suspicious_processes:
-                    print("  - Suspicious processes detected:")
-                    for proc in alert.suspicious_processes:
-                        print(f"    * {proc.name} (PID: {proc.pid})")
-                
-                # Take action (notify admin, suspend server, etc.)
-
-# Start resource monitoring
-resource_monitor.start()
-```
-
-### Processing Pterodactyl Events
-
-```python
-from pterodactyl_guardian import PterodactylGuardian
-from pterodactyl_guardian.events import EventProcessor
-
-# Initialize the Guardian
-guardian = PterodactylGuardian(
-    panel_url="https://panel.yourdomain.com",
-    api_key="your-pterodactyl-api-key",
-    api_type="application"
-)
-
-# Create event processor
-event_processor = EventProcessor(guardian)
-
-# Process server creation events
-@event_processor.on("server.create")
-def server_created(event_data):
-    # Check for suspicious server creation patterns
-    server_id = event_data["attributes"]["id"]
-    owner_id = event_data["attributes"]["user"]
     
-    # Count servers owned by this user
-    user_servers = guardian.get_user_servers(owner_id)
+    # Enable specific modules
+    enabled_modules=[
+        DetectionModules.OBFUSCATION,
+        DetectionModules.NETWORK,
+        DetectionModules.WEB_SERVER
+    ],
     
-    if len(user_servers) > 10:
-        print(f"User {owner_id} has created many servers ({len(user_servers)})")
-        guardian.log_suspicious_activity(
-            user_id=owner_id,
-            activity_type="excessive_server_creation",
-            details=f"User has created {len(user_servers)} servers"
-        )
-
-# Process user update events
-@event_processor.on("user.update")
-def user_updated(event_data):
-    # Check for suspicious account changes
-    user_id = event_data["attributes"]["id"]
-    changes = event_data["attributes"]["changed"]
+    # Configure intelligence
+    analysis_level=AnalysisLevel.DEEP,  # Deepest code analysis
+    learning_mode="aggressive",         # Learn quickly from feedback
     
-    if "email" in changes:
-        # Email change detected, check for suspicious patterns
-        new_email = changes["email"]["new"]
-        old_email = changes["email"]["old"]
-        
-        if guardian.is_suspicious_email(new_email):
-            print(f"Suspicious email change detected for user {user_id}")
-            guardian.log_suspicious_activity(
-                user_id=user_id,
-                activity_type="suspicious_email_change",
-                details=f"Changed email from {old_email} to {new_email}"
-            )
-
-# Start event processing
-event_processor.start()
-```
-
-### Checking New Server Files
-
-```python
-from pterodactyl_guardian import PterodactylGuardian
-from pterodactyl_guardian.scheduler import ScheduledCheck
-
-# Initialize the Guardian
-guardian = PterodactylGuardian(
-    panel_url="https://panel.yourdomain.com",
-    api_key="your-pterodactyl-api-key",
-    api_type="application"
+    # System resources
+    max_cpu_percent=20,                 # Cap CPU usage
+    max_memory_mb=300,                  # Limit memory usage
+    scan_threads=4,                     # Parallel scanning threads
+    
+    # Configure storage
+    storage_engine="sqlite",            # Or "postgresql"
+    data_retention_days=90,             # History retention
+    
+    # Runtime behavior
+    check_interval_minutes=30,          # Scheduled check frequency
+    alert_webhook="https://your-webhook.com/alerts"
 )
 
-# Scan for new files only (runs every 3 hours)
-new_file_scanner = ScheduledCheck(
-    interval_hours=3,
-    check_type="new_files",
-    target_servers="all",  # Scan all servers
-    file_patterns=["*.php", "*.js", "*.py"],
-    detection_modules=["obfuscation", "web_server", "security"],
-    callback=lambda results: handle_new_files(results)
-)
-
-def handle_new_files(results):
-    for server_id, new_files in results.new_files.items():
-        if new_files:
-            server_name = guardian.get_server_name(server_id)
-            print(f"New files detected on server {server_name}:")
-            
-            # Scan each new file
-            for file_path in new_files:
-                scan_result = guardian.scan_file(server_id, file_path)
-                
-                if scan_result.is_suspicious:
-                    print(f"  - Suspicious file: {file_path}")
-                    print(f"    Threat: {scan_result.threat_type}")
-                    print(f"    Score: {scan_result.threat_score}")
-                    
-                    # Take action
-                    if scan_result.threat_score > 0.8:
-                        guardian.quarantine_file(server_id, file_path)
-                        guardian.notify_admin(
-                            subject="High-risk file detected",
-                            message=f"Quarantined suspicious file on server {server_name}: {file_path}"
-                        )
-
-# Start new file scanning
-new_file_scanner.start()
+# Register custom feedback handler
+@guardian.on_detection
+def handle_detection(threat):
+    if admin_review(threat.details):
+        threat.approve()   # False positive - system learns
+    else:
+        threat.quarantine() # Confirmed threat - system reinforces
 ```
+
+## Core Components
+
+### Smart Detection Engine
+The heart of Pterodactyl Guardian is its intelligent detection engine that combines multiple analysis techniques:
+
+1. **Pattern Analysis**: Baseline detection using optimized pattern matching
+2. **Structural Analysis**: Understanding code structure through AST parsing
+3. **Behavioral Analysis**: Predicting what code will do when executed
+4. **Contextual Analysis**: Evaluating findings in the context of your environment
+
+### Adaptive Learning System
+Pterodactyl Guardian continuously improves through:
+
+- **Feedback Processing**: Learning from admin decisions
+- **Behavioral Baselining**: Establishing normal patterns
+- **Pattern Evolution**: Tracking how threats change over time
+- **Confidence Calibration**: Adjusting thresholds based on accuracy
+
+### Monitoring Systems
+Multiple monitoring approaches ensure comprehensive coverage:
+
+- **Scheduled Checks**: Regular security auditing
+- **Event Monitoring**: Real-time response to panel events
+- **File System Monitoring**: Detecting new or changed files
+- **Resource Monitoring**: Identifying abnormal resource usage
 
 ## Configuration Options
 
-```python
-guardian = PterodactylGuardian(
-    panel_url="https://panel.yourdomain.com",
-    api_key="your-pterodactyl-api-key",
-    api_type="application",  # 'application' or 'client'
-    log_level="INFO",
-    scan_threads=4,  # Number of threads for parallel scanning
-    cache_results=True,  # Cache API results
-    cache_ttl=3600,  # Cache time-to-live in seconds
-    alert_webhook="https://your-webhook-url.com/alerts",
-    api_timeout=30,  # API request timeout in seconds
-    adaptive_learning=True  # Adjust thresholds based on historical data
-)
-```
+Pterodactyl Guardian provides extensive configuration options. Here are the most important ones:
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `panel_url` | URL to your Pterodactyl Panel | Required |
+| `api_key` | Your Pterodactyl API key | Required |
+| `api_type` | API key type (application or client) | "application" |
+| `enabled_modules` | List of detection modules to enable | All modules |
+| `analysis_level` | Depth of analysis (basic, standard, deep) | "standard" |
+| `learning_mode` | Learning approach (conservative, balanced, aggressive) | "balanced" |
+| `max_cpu_percent` | Maximum CPU usage | 30% |
+| `max_memory_mb` | Maximum memory usage in MB | 250 |
+| `scan_threads` | Number of parallel scanning threads | 2 |
+| `storage_engine` | Storage backend (sqlite, postgresql) | "sqlite" |
+| `check_interval_minutes` | Minutes between scheduled checks | 60 |
+| `alert_webhook` | Webhook URL for alerts | None |
+| `detection_thresholds` | Custom thresholds for detection modules | Module defaults |
+| `quarantine_action` | Action to take on quarantine | "rename" |
+| `data_retention_days` | Days to keep historical data | 30 |
 
 ## Available Detection Modules
 
-- `automation` - Bot & automation detection
-- `network` - Network abuse protection
-- `resource` - Resource abuse prevention
-- `spam` - Spam & mass communication filtering
-- `data_harvesting` - Data harvesting protection
-- `game_server` - Game server exploit detection
-- `web_server` - Web server vulnerability detection
-- `infrastructure` - Infrastructure protection
-- `security` - General security threat detection
-- `obfuscation` - Code obfuscation analysis
+Pterodactyl Guardian includes the following detection modules:
 
-## Examples
+- `AUTOMATION`: Bot & automation detection
+- `NETWORK`: Network abuse protection
+- `RESOURCE`: Resource abuse prevention
+- `SPAM`: Spam & mass communication filtering
+- `DATA_HARVESTING`: Data harvesting protection
+- `GAME_SERVER`: Game server exploit detection
+- `WEB_SERVER`: Web server vulnerability detection
+- `INFRASTRUCTURE`: Infrastructure protection
+- `SECURITY`: General security threat detection
+- `OBFUSCATION`: Code obfuscation analysis
 
-Check the `examples/` directory for more integration patterns:
+## Performance Considerations
 
-- Scheduled API monitoring
-- New user verification
-- Server resource monitoring
-- Game server protection
-- File change detection
-- Abuse pattern detection
-- Custom event handling
+Pterodactyl Guardian is designed to be efficient and respectful of system resources:
 
-## Documentation
+- **Base Memory Usage**: 50-150MB depending on configuration
+- **Peak CPU Usage**: 5-25% during active scanning (configurable)
+- **Idle Resource Usage**: <1% CPU, minimal memory
+- **Storage Requirements**: 100MB-2GB depending on history retention
 
-For detailed API documentation, please visit our [official documentation site](https://docs.pterodactyl-guardian.com).
+The system includes automatic throttling and resource management to prevent impact on server performance.
+
+## Development
 
 ## Project Status
 
 This is a closed-source project maintained by ZenturoCloud. While we welcome feedback, bug reports, and feature requests through the Issues section, we are not accepting code contributions at this time.
 
-The SDK is professionally maintained and regularly updated to ensure compatibility with the latest API versions.
+The SDK is professionally maintained and regularly updated to ensure compatibility with the latest WhatsApp Cloud API versions.
 
-## License
+### Testing
+Run the test suite with:
+```bash
+pytest
+```
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### License
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Support
-
-For support, please contact support@zenturocloud.com or open an issue on our GitHub repository.
+For issues, questions please open an issue on GitHub.
