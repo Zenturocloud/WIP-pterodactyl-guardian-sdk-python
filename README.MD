@@ -198,7 +198,7 @@ The system includes automatic throttling and resource management to prevent impa
 
 This is a closed-source project maintained by ZenturoCloud. While we welcome feedback, bug reports, and feature requests through the Issues section, we are not accepting code contributions at this time.
 
-The SDK is professionally maintained and regularly updated to ensure compatibility with the latest WhatsApp Cloud API versions.
+The SDK is professionally maintained and regularly updated to ensure compatibility with the latest API versions.
 
 ### Testing
 Run the test suite with:
